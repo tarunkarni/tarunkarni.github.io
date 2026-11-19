@@ -1315,6 +1315,20 @@ playBtn.addEventListener('click', function(){
 });
 setPlayUI();
 window.addEventListener('resize', function(){ measure(); });
+// If the code font arrives after the stream started, tokens get wider: re-measure and push them apart.
+function relayout(){
+  var live = M.toks.filter(function(t){ return !t.done; });
+  live.forEach(function(t){ t.w = t.el.offsetWidth; });
+  for(var i = 1; i < live.length; i++){
+    var need = GAP + (live[i].it.gap || 0);
+    live[i].x = Math.min(live[i].x, live[i - 1].x - need - live[i].w); place(live[i]);
+  }
+  measure();
+}
+if(document.fonts){
+  if(document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', relayout);
+  if(document.fonts.ready) document.fonts.ready.then(relayout);
+}
 onVisible(M.el, function(v){ M.visible = v; });
 startLens('sec');
 requestAnimationFrame(frame);
